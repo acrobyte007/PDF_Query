@@ -20,7 +20,5 @@ Appliaction [https://huggingface.co/spaces/ajoy0071998/PDF_Query]
 - **API Integration**: Mistral API for question answering.
 - **PDF Processing**: PyPDF2 for text extraction.
 
-## Installation
 
-1. Clone the repository:
 
