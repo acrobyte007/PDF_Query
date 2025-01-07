@@ -10,7 +10,7 @@ import re
 import hashlib
 
 # Set Mistral API Key
-MISTRAL_API_KEY = "S3vzsvK7rP5in24joHgL55dVCjqYSi1F"
+MISTRAL_API_KEY = "API KEY"
 
 # Initialize SBERT model
 sbert_model = SentenceTransformer("all-MiniLM-L6-v2")
