@@ -10,7 +10,7 @@ Appliaction [https://huggingface.co/spaces/ajoy0071998/PDF_Query]
 - **Embedding Generation**: Generate embeddings for text chunks using SBERT (`all-MiniLM-L6-v2`).
 - **FAISS Indexing**: Use FAISS for efficient similarity search across text embeddings.
 - **Question Answering**: Query a selected project's knowledge base, retrieving the most relevant text chunks and leveraging the Mistral API for contextual answers.
-- **Caching**: Cache question-answer pairs to optimize repeated queries.
+
 
 ## Tech Stack
 
