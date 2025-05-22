@@ -1,0 +1,6 @@
+langchain
+tiktoken
+sentence_transformers
+langchain_community
+langchain-core
+langchain-huggingface
