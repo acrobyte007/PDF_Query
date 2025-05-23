@@ -1,53 +1,40 @@
-import streamlit as st
+from fastapi import FastAPI, File, UploadFile, Form, HTTPException
+from fastapi.responses import JSONResponse
 import os
 import shutil
 from chain import extract_pdf_with_user, get_final_aswer
 
+app = FastAPI()
+
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-st.title("PDF Extraction and Question Answering")
+@app.post("/extract/")
+async def extract_pdf(
+    user_id: str = Form(...),
+    name: str = Form(...),
+    uploaded_file: UploadFile = File(...)
+):
+    if not uploaded_file.filename.endswith(".pdf"):
+        raise HTTPException(status_code=400, detail="Only PDF files are allowed.")
+    
+    upload_path = os.path.join(UPLOAD_DIR, uploaded_file.filename)
+    with open(upload_path, "wb") as buffer:
+        shutil.copyfileobj(uploaded_file.file, buffer)
 
-# --- Step 1: Upload PDF and extract ---
+    documents = extract_pdf_with_user(user_id, upload_path, name)
+    return {"message": "PDF processed!", "documents": documents}
 
-st.header("Upload PDF and extract text")
 
-user_id = st.text_input("User ID")
-name = st.text_input("Save PDF name (without extension)")
-
-uploaded_file = st.file_uploader("Upload PDF file", type=["pdf"])
-
-if st.button("Extract PDF"):
-
-    if not user_id or not name or not uploaded_file:
-        st.error("Please provide User ID, name, and upload a PDF file.")
-    else:
-        # Save uploaded PDF
-        upload_path = os.path.join(UPLOAD_DIR, uploaded_file.name)
-        with open(upload_path, "wb") as f:
-            shutil.copyfileobj(uploaded_file, f)
-
-        # Call your extraction function
-        documents = extract_pdf_with_user(user_id, upload_path, name)
-        st.success("PDF processed!")
-        st.write("Extracted documents:")
-        st.write(documents)
-
-# --- Step 2: Ask a question ---
-
-st.header("Ask a question")
-
-query = st.text_input("Enter your question")
-
-if st.button("Get Answer"):
-
-    if not user_id or not name or not query:
-        st.error("Please provide User ID, name, and your question.")
-    else:
-        pdf_path = os.path.join(UPLOAD_DIR, f"{name}.pdf")
-        if not os.path.exists(pdf_path):
-            st.error(f"No PDF found with name '{name}.pdf'. Please upload and extract first.")
-        else:
-            answer = get_final_aswer(query, user_id, pdf_path)
-            st.success("Answer generated!")
-            st.write(answer)
+@app.post("/answer/")
+async def get_answer(
+    user_id: str = Form(...),
+    name: str = Form(...),
+    query: str = Form(...)
+):
+    pdf_path = os.path.join(UPLOAD_DIR, f"{name}.pdf")
+    if not os.path.exists(pdf_path):
+        raise HTTPException(status_code=404, detail=f"No PDF found with name '{name}.pdf'. Please upload and extract first.")
+    
+    answer = get_final_aswer(query, user_id, pdf_path)
+    return {"message": "Answer generated!", "answer": answer}
