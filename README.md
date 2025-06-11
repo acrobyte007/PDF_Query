@@ -1,7 +1,6 @@
 # FastAPI-Based PDF Knowledge Base with SBERT and Mistral API
 
 This application allows users to create and manage projects for processing PDF documents, generating semantic embeddings using SBERT, and querying a knowledge base using the Mistral API for question answering.
-Appliaction [https://huggingface.co/spaces/ajoy0071998/PDF_Query]
 ## Features
 
 - **Project Management**: Create, delete, and manage projects.
