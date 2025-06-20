@@ -1,7 +1,9 @@
 from langchain_mistralai import ChatMistralAI
 from langchain_core.prompts import ChatPromptTemplate
 from vector_db import search_similar_documents
-
+from dotenv import load_dotenv
+import os
+load_dotenv()
 def initialize_llm():
     """Initialize and return the Mistral AI language model."""
     try:
@@ -14,19 +16,17 @@ def initialize_llm():
     except Exception as e:
         raise Exception(f"Error initializing LLM: {str(e)}")
 
-def generate_rag_response(query: str, user_id: str, input_language: str = "English", output_language: str = "German", k: int = 2) -> dict:
+def generate_rag_response(query: str, user_id: str, k: int = 2) -> dict:
     """
-    Retrieve relevant documents and generate a response using Mistral AI.
+    Retrieve relevant documents and generate an answer to the query using Mistral AI.
     
     Args:
-        query: The search query string
+        query: The question to be answered
         user_id: Unique identifier for the user
-        input_language: Language of the input query (default: English)
-        output_language: Desired language for the response (default: German)
         k: Number of documents to retrieve (default: 2)
         
     Returns:
-        dict: Contains the generated response and retrieved documents
+        dict: Contains the generated answer and retrieved documents
     """
     try:
         if not query or not user_id:
@@ -35,7 +35,7 @@ def generate_rag_response(query: str, user_id: str, input_language: str = "Engli
         # Retrieve relevant documents
         documents = search_similar_documents(query, user_id, k)
         if not documents:
-            return {"response": "No relevant documents found.", "documents": []}
+            return {"response": "No relevant documents found to answer the query.", "documents": []}
         
         # Initialize LLM and prompt
         llm = initialize_llm()
@@ -43,8 +43,10 @@ def generate_rag_response(query: str, user_id: str, input_language: str = "Engli
             [
                 (
                     "system",
-                    "You are a helpful assistant that translates {input_language} to {output_language}. "
-                    "Use the following context to inform your response:\n{context}"
+                    "You are a helpful assistant that answers questions based on the provided context. "
+                    "Use only the information in the context to answer the question accurately and concisely. "
+                    "If the context does not contain enough information to answer, say so.\n"
+                    "Context:\n{context}"
                 ),
                 ("human", "{input}"),
             ]
@@ -59,8 +61,6 @@ def generate_rag_response(query: str, user_id: str, input_language: str = "Engli
         # Generate response
         result = chain.invoke(
             {
-                "input_language": input_language,
-                "output_language": output_language,
                 "input": query,
                 "context": context
             }

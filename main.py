@@ -11,8 +11,6 @@ app = FastAPI()
 class QueryRequest(BaseModel):
     query: str
     user_id: str
-    input_language: str = "English"
-    output_language: str = "German"
 
 @app.post("/upload-document/")
 async def upload_document(file: UploadFile = File(...), user_id: str = Form(...)):
@@ -65,19 +63,17 @@ async def upload_document(file: UploadFile = File(...), user_id: str = Form(...)
 @app.post("/search/")
 async def search_documents(query_request: QueryRequest):
     """
-    Endpoint to perform a similarity search and generate a response using RAG.
+    Endpoint to perform a similarity search and generate an answer using RAG.
     
     Args:
-        query_request: JSON body containing query, user_id, input_language, and output_language
+        query_request: JSON body containing query and user_id
         
     Returns:
-        JSON response with generated response and retrieved documents
+        JSON response with generated answer and retrieved documents
     """
     try:
         query = query_request.query
         user_id = query_request.user_id
-        input_language = query_request.input_language
-        output_language = query_request.output_language
         
         # Validate inputs
         if not query or not user_id:
@@ -87,8 +83,6 @@ async def search_documents(query_request: QueryRequest):
         result = generate_rag_response(
             query=query,
             user_id=user_id,
-            input_language=input_language,
-            output_language=output_language,
             k=2
         )
         
